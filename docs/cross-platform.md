@@ -224,7 +224,8 @@ OHOS 壳只负责启动引擎。这也是"一套代码"最直观的体现——
 - **macOS**：无 Apple 开发者账号，产物是**未签名**的 zip（内含
   `Snake.app`）。macOS 首次打开需右键 → 打开，或执行
   `xattr -d com.apple.quarantine Snake.app`。构建用
-  `--universal`，Intel 与 Apple Silicon 都能装
+  `flutter build macos --release` 即可：Flutter 3.44 起 macOS 的
+  release 构建默认输出 universal 二进制，Intel 与 Apple Silicon 都能装
 - **iOS**：`flutter build ipa` 必须用 Apple 开发者账号（$99/年）
   签发的证书 + 描述文件。流水线已写好，只需在仓库
   Settings → Secrets and variables → Actions 配置四个值：

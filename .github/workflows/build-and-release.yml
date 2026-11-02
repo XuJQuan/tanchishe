@@ -89,9 +89,11 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
       - run: flutter config --no-analytics
-      - name: Build macOS universal binary (x86_64 + arm64)
+      # Flutter 3.44 的 macOS release 构建默认输出 universal 二进制
+      # （arm64 + x86_64），无需额外参数
+      - name: Build macOS (universal)
         working-directory: snake
-        run: flutter build macos --release --universal
+        run: flutter build macos --release
       - name: Package zip
         run: |
           cd snake/build/macos/Build/Products/Release
