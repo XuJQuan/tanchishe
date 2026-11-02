@@ -1,0 +1,10 @@
+++
+# 构建产物
+download/releases/*
+!download/releases/README.md
+!download/releases/.gitignore
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+*.swp

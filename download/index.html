@@ -1,0 +1,195 @@
+++
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>贪吃蛇 · 下载</title>
+<style>
+  :root {
+    --bg: #0B1220;
+    --surface: #111A2C;
+    --border: #1E293B;
+    --text: #E2E8F0;
+    --muted: #94A3B8;
+    --accent: #22C55E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 28px; font-weight: 700; }
+  h1 .dot { color: var(--accent); }
+  .sub { color: var(--muted); margin: 10px 0 32px; font-size: 14px; line-height: 1.7; }
+  .sub code {
+    font-family: Consolas, "Cascadia Code", monospace;
+    background: rgba(255,255,255,.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--text);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color .15s ease;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .top { display: flex; align-items: center; gap: 12px; }
+  .card .icon {
+    width: 44px; height: 44px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    background: rgba(255,255,255,.05);
+    border-radius: 8px;
+  }
+  .card h2 { font-size: 16px; font-weight: 600; }
+  .card .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .card .build {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: Consolas, "Cascadia Code", monospace;
+    background: rgba(255,255,255,.04);
+    border-radius: 6px;
+    padding: 6px 8px;
+    overflow-wrap: anywhere;
+  }
+  .card .note { font-size: 12px; color: #F59E0B; line-height: 1.5; }
+  .dl {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    background: var(--accent);
+    color: #052E12;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    margin-top: auto;
+  }
+  .dl:hover { background: #34D399; }
+  .dl.ghost {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  .dl.ghost:hover { background: rgba(34,197,94,.1); }
+  footer { margin-top: 32px; font-size: 12px; color: var(--muted); }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>贪吃蛇<span class="dot"> · 下载</span></h1>
+  <p class="sub">
+    同一套 Flutter 源码，为六个平台各生成一个原生安装包，外加一个 Web 在线版。
+    把构建产物按下方文件名放入 <code>releases/</code> 目录后，对应按钮即可直接下载。
+  </p>
+  <div class="grid">
+    <div class="card">
+      <div class="top">
+        <div class="icon">🤖</div>
+        <div>
+          <h2>安卓 Android</h2>
+          <div class="meta">APK · arm64-v8a</div>
+        </div>
+      </div>
+      <div class="build">flutter build apk</div>
+      <a class="dl" href="./releases/snake-android-arm64-v8a.apk">下载 APK</a>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="icon">🍎</div>
+        <div>
+          <h2>iOS</h2>
+          <div class="meta">IPA · 需 macOS + 签名</div>
+        </div>
+      </div>
+      <div class="build">flutter build ios --release</div>
+      <div class="note">只能在 macOS 上用 Xcode 构建并签名</div>
+      <a class="dl ghost" href="./releases/snake-ios.ipa">下载 IPA</a>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="icon">🌸</div>
+        <div>
+          <h2>鸿蒙 HarmonyOS NEXT</h2>
+          <div class="meta">HAP · 需 DevEco Studio</div>
+        </div>
+      </div>
+      <div class="build">DevEco 签名打包（OpenHarmony Flutter 工具链）</div>
+      <div class="note">官方 stable 的 flutter create 不含 ohos 壳，需 OHOS 工具链生成</div>
+      <a class="dl ghost" href="./releases/snake-harmonyos.hap">下载 HAP</a>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="icon">🖥️</div>
+        <div>
+          <h2>Windows</h2>
+          <div class="meta">安装包 · x64</div>
+        </div>
+      </div>
+      <div class="build">flutter build windows</div>
+      <a class="dl" href="./releases/snake-windows-x64.zip">下载 zip</a>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="icon">🐧</div>
+        <div>
+          <h2>Linux</h2>
+          <div class="meta">tar.gz · x64</div>
+        </div>
+      </div>
+      <div class="build">flutter build linux</div>
+      <a class="dl" href="./releases/snake-linux-x64.tar.gz">下载 tar.gz</a>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="icon">🍏</div>
+        <div>
+          <h2>macOS</h2>
+          <div class="meta">DMG · 需 macOS 签名</div>
+        </div>
+      </div>
+      <div class="build">flutter build macos</div>
+      <a class="dl ghost" href="./releases/snake-macos.dmg">下载 DMG</a>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="icon">🌐</div>
+        <div>
+          <h2>Web 在线版</h2>
+          <div class="meta">浏览器直接玩 · 无需安装</div>
+        </div>
+      </div>
+      <div class="build">flutter build web</div>
+      <div class="note">构建后把 snake/build/web 作为静态服务根目录打开（或 flutter run -d chrome）</div>
+      <a class="dl" href="../snake/build/web/index.html">在线试玩</a>
+    </div>
+  </div>
+  <footer>
+    各平台构建命令与工具链安装步骤：<a href="../docs/cross-platform.md">docs/cross-platform.md</a>
+  </footer>
+</div>
+</body>
+</html>
