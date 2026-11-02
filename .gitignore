@@ -8,3 +8,5 @@ download/releases/*
 .DS_Store
 Thumbs.db
 *.swp
+# local toolchain caches (android sdk links, gradle, pub) - machine specific
+.tools/
