@@ -212,7 +212,7 @@ OHOS 壳只负责启动引擎。这也是"一套代码"最直观的体现——
   - 四个 job 并行：ubuntu-latest（Android APK、Linux tar.gz）、
     windows-latest（Windows zip）、macos-latest（macOS 通用 zip）
   - `release` job 汇总产物发布到 GitHub Release
-  - `ios` job 仅在仓库配置了 `APPLE_CERTIFICATE` Secret 时启用
+  - `ios` job 仅在仓库变量 `IOS_ENABLED` 设为 `true` 时启用（见 10.2）
 - `web-pages.yml`：push master 或手动触发
   - `flutter build web --release` → 部署到 GitHub Pages，
     下载页"Web 在线版"卡片指向 `https://xujquan.github.io/tanchishe/`
@@ -233,7 +233,11 @@ OHOS 壳只负责启动引擎。这也是"一套代码"最直观的体现——
   - `APPLE_PROVISIONING_PROFILE`（.mobileprovision 的 base64，
     必须覆盖 bundle id `com.xujq.snake.Runner`）
   - `APPLE_KEYCHAIN_PASS`（临时 keychain 密码，任意字符串）
-  配好后下一次打 tag 会自动多出一个 IPA
+  - 再到 Settings → Secrets and variables → Variables 加一个仓库变量
+    `IOS_ENABLED` = `true` 作为开关（GitHub 的 `if` 条件不允许
+    `secrets` 上下文，所以用普通变量控制；公开仓库里变量值可见，
+    但它只是个布尔值，无敏感信息）
+  两者都配好后，下一次打 tag 会自动多出一个 IPA
 - **鸿蒙 NEXT**：公共 runner 上没有 OpenHarmony 工具链，打 HAP
   需要自托管 runner（在自己的机器装 OpenHarmony SIG 的 Flutter
   fork + DevEco SDK 并注册到 Actions）。对学习型项目不值得，
