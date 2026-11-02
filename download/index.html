@@ -97,7 +97,8 @@
   <h1>贪吃蛇<span class="dot"> · 下载</span></h1>
   <p class="sub">
     同一套 Flutter 源码，为六个平台各生成一个原生安装包，外加一个 Web 在线版。
-    把构建产物按下方文件名放入 <code>releases/</code> 目录后，对应按钮即可直接下载。
+    安装包由 GitHub Actions 自动构建并发布到 <a href="https://github.com/XuJQuan/tanchishe/releases" style="color:var(--accent)">GitHub Release</a>，
+    下方按钮直接指向 Release 资产（当前版本 v0.1.0）。
   </p>
   <div class="grid">
     <div class="card">
@@ -109,7 +110,7 @@
         </div>
       </div>
       <div class="build">flutter build apk</div>
-      <a class="dl" href="./releases/snake-android-arm64-v8a.apk">下载 APK</a>
+      <a class="dl" href="https://github.com/XuJQuan/tanchishe/releases/download/v0.1.0/snake-android-arm64-v8a.apk">下载 APK</a>
     </div>
 
     <div class="card">
@@ -117,11 +118,11 @@
         <div class="icon">🍎</div>
         <div>
           <h2>iOS</h2>
-          <div class="meta">IPA · 需 macOS + 签名</div>
+          <div class="meta">IPA · 需 Apple 开发者账号</div>
         </div>
       </div>
       <div class="build">flutter build ios --release</div>
-      <div class="note">只能在 macOS 上用 Xcode 构建并签名</div>
+      <div class="note">GitHub Actions 已内置该 job：在仓库 Settings → Secrets 配置 4 个 Apple 签名密钥（含开发者账号证书 + 描述文件）后，打 tag 即自动出 IPA</div>
       <a class="dl ghost" href="./releases/snake-ios.ipa">下载 IPA</a>
     </div>
 
@@ -147,7 +148,7 @@
         </div>
       </div>
       <div class="build">flutter build windows</div>
-      <a class="dl" href="./releases/snake-windows-x64.zip">下载 zip</a>
+      <a class="dl" href="https://github.com/XuJQuan/tanchishe/releases/download/v0.1.0/snake-windows-x64.zip">下载 zip</a>
     </div>
 
     <div class="card">
@@ -159,7 +160,7 @@
         </div>
       </div>
       <div class="build">flutter build linux</div>
-      <a class="dl" href="./releases/snake-linux-x64.tar.gz">下载 tar.gz</a>
+      <a class="dl" href="https://github.com/XuJQuan/tanchishe/releases/download/v0.1.0/snake-linux-x64.tar.gz">下载 tar.gz</a>
     </div>
 
     <div class="card">
@@ -167,11 +168,12 @@
         <div class="icon">🍏</div>
         <div>
           <h2>macOS</h2>
-          <div class="meta">DMG · 需 macOS 签名</div>
+          <div class="meta">zip · x86_64 + arm64 通用</div>
         </div>
       </div>
-      <div class="build">flutter build macos</div>
-      <a class="dl ghost" href="./releases/snake-macos.dmg">下载 DMG</a>
+      <div class="build">flutter build macos --release --universal</div>
+      <div class="note">未签名构建：macOS 首次打开请右键 → 打开，或执行 xattr -d com.apple.quarantine Snake.app</div>
+      <a class="dl" href="https://github.com/XuJQuan/tanchishe/releases/download/v0.1.0/snake-macos.zip">下载 zip</a>
     </div>
 
     <div class="card">
@@ -183,12 +185,13 @@
         </div>
       </div>
       <div class="build">flutter build web</div>
-      <div class="note">构建后把 snake/build/web 作为静态服务根目录打开，如 python -m http.server 8766 --directory build\web（或 flutter run -d chrome）</div>
-      <a class="dl" href="http://127.0.0.1:8766/">在线试玩</a>
+      <div class="note">GitHub Actions 每次 push master 自动发布到 GitHub Pages，任意设备浏览器直接玩</div>
+      <a class="dl" href="https://xujquan.github.io/tanchishe/">在线试玩</a>
     </div>
   </div>
   <footer>
-    各平台构建命令与工具链安装步骤：<a href="../docs/cross-platform.md">docs/cross-platform.md</a>
+    各平台构建命令、工具链安装步骤与 GitHub Actions 云端出包说明：<a href="../docs/cross-platform.md">docs/cross-platform.md</a>
+    · 源码与构建流水线：<a href="https://github.com/XuJQuan/tanchishe">github.com/XuJQuan/tanchishe</a>
   </footer>
 </div>
 </body>

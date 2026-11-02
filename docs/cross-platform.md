@@ -195,3 +195,61 @@ OHOS 壳只负责启动引擎。这也是"一套代码"最直观的体现——
 一个顺带收获：测试抓到过引擎的真实 bug——tick 定时器是一次性的，
 蛇只走一步就停。这正是"逻辑写成纯 Dart 函数"的红利：
 不需要任何真机，单测就能把这种时序 bug 逼出来。
+
+## 10. GitHub Actions 云端出包（本仓库的做法）
+
+本机只是一台 Windows 10，出不了 iOS / Linux / macOS / 鸿蒙的包。
+所以本仓库把四个可云端构建的平台（Android / Windows / Linux / macOS）
+交给 GitHub Actions：并行构建，产物自动发布到 GitHub Release，
+下载页的按钮全部指向 Release 资产。好处是下载页不再依赖本机的
+本地静态服务器，换任何一台设备、任何网络都能打开并下载。
+
+### 10.1 流水线结构
+
+`.github/workflows/` 下两个 workflow：
+
+- `build-and-release.yml`：push `v*` tag 或手动触发
+  - 四个 job 并行：ubuntu-latest（Android APK、Linux tar.gz）、
+    windows-latest（Windows zip）、macos-latest（macOS 通用 zip）
+  - `release` job 汇总产物发布到 GitHub Release
+  - `ios` job 仅在仓库配置了 `APPLE_CERTIFICATE` Secret 时启用
+- `web-pages.yml`：push master 或手动触发
+  - `flutter build web --release` → 部署到 GitHub Pages，
+    下载页"Web 在线版"卡片指向 `https://xujquan.github.io/tanchishe/`
+
+### 10.2 各平台说明
+
+- **Android / Windows / Linux**：公共 runner 自带对应工具链
+  （Android SDK / VS C++ / GTK），`flutter build` 直接跑通，无需额外配置
+- **macOS**：无 Apple 开发者账号，产物是**未签名**的 zip（内含
+  `Snake.app`）。macOS 首次打开需右键 → 打开，或执行
+  `xattr -d com.apple.quarantine Snake.app`。构建用
+  `--universal`，Intel 与 Apple Silicon 都能装
+- **iOS**：`flutter build ipa` 必须用 Apple 开发者账号（$99/年）
+  签发的证书 + 描述文件。流水线已写好，只需在仓库
+  Settings → Secrets and variables → Actions 配置四个值：
+  - `APPLE_CERTIFICATE`（.p12 的 base64）
+  - `APPLE_CERTIFICATE_PASSWORD`（p12 密码）
+  - `APPLE_PROVISIONING_PROFILE`（.mobileprovision 的 base64，
+    必须覆盖 bundle id `com.xujq.snake.Runner`）
+  - `APPLE_KEYCHAIN_PASS`（临时 keychain 密码，任意字符串）
+  配好后下一次打 tag 会自动多出一个 IPA
+- **鸿蒙 NEXT**：公共 runner 上没有 OpenHarmony 工具链，打 HAP
+  需要自托管 runner（在自己的机器装 OpenHarmony SIG 的 Flutter
+  fork + DevEco SDK 并注册到 Actions）。对学习型项目不值得，
+  维持本地 DevEco 构建
+
+### 10.3 发版流程
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+等 10–20 分钟（四平台并行构建），GitHub Release `v0.2.0` 即有
+Android / Windows / Linux / macOS 四个包（配了 iOS Secrets 则是五个）。
+升级版本时把 `download/index.html` 里各 href 的
+`releases/download/v0.2.0/...` 版本号改一下即可。
+
+费用：公共仓库的 Actions 分钟数免费，本项目一次发版全部 job
+合计约 15–25 分钟。

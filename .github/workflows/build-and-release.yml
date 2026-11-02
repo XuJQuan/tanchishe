@@ -1,0 +1,164 @@
+name: Build & Release
+
+# 打 tag（v*）或手动触发：并行构建 Android / Windows / Linux / macOS（+ 可选 iOS），
+# 汇总后发布到 GitHub Release，下载页按钮指向这些 Release 资产。
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.44.1'
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter config --no-analytics
+      - name: Build APK
+        working-directory: snake
+        run: flutter build apk --release
+      - name: Rename APK
+        run: cp snake/build/app/outputs/flutter-apk/app-release.apk snake-android-arm64-v8a.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: snake-android-arm64-v8a.apk
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter config --no-analytics
+      - name: Build Windows
+        working-directory: snake
+        run: flutter build windows --release
+      - name: Package zip
+        run: Compress-Archive -Path "snake/build/windows/x64/runner/Release/*" -DestinationPath "snake-windows-x64.zip" -CompressionLevel Optimal
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: snake-windows-x64.zip
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Install Linux desktop deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+      - run: flutter config --no-analytics
+      - name: Build Linux
+        working-directory: snake
+        run: flutter build linux --release
+      - name: Package tar.gz
+        run: tar -czf snake-linux-x64.tar.gz -C snake/build/linux/x64/release bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: snake-linux-x64.tar.gz
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter config --no-analytics
+      - name: Build macOS universal binary (x86_64 + arm64)
+        working-directory: snake
+        run: flutter build macos --release --universal
+      - name: Package zip
+        run: |
+          cd snake/build/macos/Build/Products/Release
+          APP=$(ls -d *.app)
+          zip -r "$GITHUB_WORKSPACE/snake-macos.zip" "$APP"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: snake-macos.zip
+
+  # iOS：仅当仓库配置了 Apple 签名 Secrets 时才运行。
+  # 需要在 Settings → Secrets 配置（值均 base64 或明文，按 flutter 文档）：
+  #   APPLE_CERTIFICATE / APPLE_CERTIFICATE_PASSWORD / APPLE_PROVISIONING_PROFILE / APPLE_KEYCHAIN_PASS
+  # 描述文件必须覆盖 bundle id：com.xujq.snake.Runner
+  ios:
+    if: ${{ secrets.APPLE_CERTIFICATE != '' }}
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter config --no-analytics
+      - name: Build IPA
+        working-directory: snake
+        run: flutter build ipa --release
+        env:
+          IOS_CERT_P12: ${{ secrets.APPLE_CERTIFICATE }}
+          IOS_CERT_P12_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+          IOS_KEYCHAIN_PASS: ${{ secrets.APPLE_KEYCHAIN_PASS }}
+      - name: Rename IPA
+        run: |
+          cp "$(ls snake/build/ios/iphoneos/*.ipa | head -1)" snake-ios.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: snake-ios.ipa
+
+  # 汇总发布：四个核心平台成功后创建/更新 GitHub Release
+  release:
+    needs: [android, windows, linux, macos]
+    if: always() && needs.android.result == 'success' && needs.windows.result == 'success' && needs.linux.result == 'success' && needs.macos.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/android/snake-android-arm64-v8a.apk
+            dist/windows/snake-windows-x64.zip
+            dist/linux/snake-linux-x64.tar.gz
+            dist/macos/snake-macos.zip
+
+  # iOS 包在 Release 建好之后追加上传
+  ios-publish:
+    needs: [ios, release]
+    if: needs.ios.result == 'success' && needs.release.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ios
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: dist/snake-ios.ipa
